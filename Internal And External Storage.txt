@@ -1,0 +1,299 @@
+1. INTERNAL STORAGE
+
+MAIN ACTIVITY
+
+package com.david.InternalStorage1;
+
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
+public class MainActivity extends Activity {
+
+    EditText textmsg;
+    private String file= "my data";
+    static final int READ_BLOCK_SIZE = 100;
+    TextView tv;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        tv=findViewById(R.id.tv_read);
+        textmsg=(EditText)findViewById(R.id.editText1);
+    }
+
+    // write text to file
+    public void WriteBtn(View v) {
+        // add-write text into file
+        try {
+            FileOutputStream fileout=openFileOutput(file, MODE_PRIVATE);
+            OutputStreamWriter outputWriter=new OutputStreamWriter(fileout);
+            outputWriter.write(textmsg.getText().toString());
+            outputWriter.close();
+
+            //display file saved message
+            Toast.makeText(getBaseContext(), "File saved successfully!",
+                    Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Read text from file
+    public void ReadBtn(View v) {
+        //reading text from file
+        try {
+            FileInputStream fin = openFileInput(file);
+            int c;
+            String temp="";
+            while( (c = fin.read()) != -1){
+                temp = temp + Character.toString((char)c);
+            }
+            tv.setText(temp);
+            Toast.makeText(getBaseContext(),"file read",Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+XML FILE
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:padding="5dp"
+        android:gravity="center"
+        android:text="Read and Write Text from/to a File"
+        android:textStyle="bold"
+        android:textSize="28sp" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="100dp"
+        android:layout_marginLeft="20dp"
+
+        android:layout_marginRight="20dp">
+        <requestFocus />
+    </EditText>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read"
+        android:id="@+id/tv_read"
+        android:layout_below="@+id/editText1"
+        android:layout_marginLeft="30dp"
+        android:textSize="20dp"/>
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Write"
+        android:onClick="WriteBtn"
+        android:layout_below="@id/editText1"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="130dp"
+        android:layout_toRightOf="@+id/button2"
+         />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read"
+        android:onClick="ReadBtn"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="30dp"
+        android:layout_below="@+id/editText1"
+
+        />
+
+</RelativeLayout>
+
+
+
+2. EXTERNAL STORAGE
+
+MAIN ACTIVITY
+
+package com.david.ExternalStorage1;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import android.os.Bundle;
+import android.app.Activity;
+import android.os.Environment;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+
+public class MainActivity extends Activity {
+    EditText inputText;
+    TextView response;
+    Button saveButton,readButton;
+
+    private String filename = "SampleFile.txt";
+    private String filepath = "MyFileStorage";
+    File myExternalFile;
+    String myData = "";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        inputText = (EditText) findViewById(R.id.myInputText);
+        response = (TextView) findViewById(R.id.response);
+
+
+         saveButton =
+                (Button) findViewById(R.id.saveExternalStorage);
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    FileOutputStream fos = new FileOutputStream(myExternalFile);
+                    fos.write(inputText.getText().toString().getBytes());
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                inputText.setText("");
+                response.setText("SampleFile.txt saved to External Storage...");
+            }
+        });
+
+        readButton = (Button) findViewById(R.id.getExternalStorage);
+        readButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    FileInputStream fis = new FileInputStream(myExternalFile);
+                    DataInputStream in = new DataInputStream(fis);
+                    BufferedReader br =
+                            new BufferedReader(new InputStreamReader(in));
+                    String strLine;
+                    while ((strLine = br.readLine()) != null) {
+                        myData = myData + strLine;
+                    }
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                inputText.setText(myData);
+                response.setText("SampleFile.txt data retrieved from External Storage...");
+            }
+        });
+
+        if (!isExternalStorageAvailable() || isExternalStorageReadOnly()) {
+            saveButton.setEnabled(false);
+        }
+        else {
+            myExternalFile = new File(getExternalFilesDir(filepath), filename);
+        }
+
+
+    }
+    private static boolean isExternalStorageReadOnly() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isExternalStorageAvailable() {
+        String extStorageState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(extStorageState)) {
+            return true;
+        }
+        return false;
+    }
+
+
+}
+
+XML FILE
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Reading and Writing to External Storage"
+        android:textSize="24sp"
+        android:gravity="center"/>
+
+    <EditText android:id="@+id/myInputText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+         android:gravity="top|left"
+        android:layout_marginTop="100dp"
+        android:inputType="textMultiLine">
+
+        <requestFocus />
+    </EditText>
+
+    <LinearLayout
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal"
+        android:weightSum="1.0"
+        android:layout_marginTop="20dp">
+
+    <Button android:id="@+id/saveExternalStorage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SAVE"
+        android:layout_weight="0.5"/>
+
+    <Button android:id="@+id/getExternalStorage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:text="READ" />
+
+    </LinearLayout>
+
+    <TextView android:id="@+id/response"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:padding="5dp"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</LinearLayout>
+
